@@ -1,0 +1,30 @@
+.main{
+  width: 100%;
+}
+
+.container{
+  display: flex;
+  justify-content: center;
+  padding-top: 10px;
+}
+
+.inputform{
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  font-size: 2rem;
+  color: red;
+}
+
+.inputform input{
+  margin: 10px;
+  font-size: 2rem;
+}
+
+.middleman{
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  font-size: 5rem;
+  height: 100vh;
+}
