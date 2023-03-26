@@ -17,8 +17,8 @@ router.post("/register", async (req,res,next) =>{
 
         const user = new User(result);
         const savedUser = await user.save();
-
-        res.status(201).json(savedUser);
+        let {isAdmin, password, ...safeUserData} = savedUser._doc
+        res.status(201).json(safeUserData);
 
     }catch(err){
         if (err.isJoi){err.status = 422}
@@ -40,9 +40,10 @@ router.post("/login", async (req,res,next) =>{
         const accessToken = await signAccessToken(user.id);
         const refreshToken = await signRefreshToken(user.id);
         
-        res.cookie('accessToken', accessToken, {maxAge: 15*60*1000})
-        res.cookie('refreshToken', refreshToken, {maxAge: 7*24*60*60*1000, sameSite:'strict', path:'/refresh-token'})
-        res.status(200).json(user);
+        res.cookie('accessToken', accessToken, {maxAge: 15*60*1000, httpOnly:true})
+        res.cookie('refreshToken', refreshToken, {maxAge: 7*24*60*60*1000, sameSite:'strict', path:'/refresh-token', httpOnly:true})
+        const {isAdmin, password, ...safeUserData} = user._doc
+        res.status(200).json(safeUserData);
         
     } catch (err) {
         console.log(err.message)
@@ -50,6 +51,8 @@ router.post("/login", async (req,res,next) =>{
         next(err);
     }
 })
+
+//Verify refresh token from cookie and set new access and refresh token in cookies
 
 router.post("/refresh-token", async (req,res,next) =>{
     try {
@@ -63,6 +66,10 @@ router.post("/refresh-token", async (req,res,next) =>{
         next(err)
     }
 })
+
+//Get refresh token from cookie
+//Delete it from redis
+//Then delete cookies in browser and send http status code 204
 
 router.delete("/logout", async (req,res,next) =>{
     try{

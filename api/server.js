@@ -7,6 +7,7 @@ const cors = require('cors')
 require("dotenv").config();
 require("./helpers/initMongodb");
 const authRoute = require('./routes/auth.route');
+const checkRoute = require('./routes/check.route');
 const {verifyAccessToken} = require("./helpers/jwt.helper");
 const client = require('./helpers/init_redis');
 
@@ -22,15 +23,17 @@ app.use(express.urlencoded({extended:true}));
 
 // ROUTES
 app.get('/', verifyAccessToken, (req,res)=>{
-    res.send("It appears that you are a safe client. Enjoy");
+    res.json("It appears that you are a safe client. Enjoy");
 })
 app.use('/auth',authRoute);
+app.use('/checks', checkRoute);
 
 
 
 //ERROR HANDLERS
 
 app.use(async (req,res,next) =>{
+    console.log("error 404")
     next(createError.NotFound());
 })
 

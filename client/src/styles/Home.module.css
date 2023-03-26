@@ -5,6 +5,7 @@
 .container{
   display: flex;
   justify-content: center;
+  margin: 0 auto;
   padding-top: 10px;
 }
 
@@ -27,4 +28,28 @@
   justify-content: center;
   font-size: 5rem;
   height: 100vh;
+}
+
+.link{
+  display: block;
+  margin: 20px;
+  font-size: 2rem;
+  border: 2px solid gray;
+  padding:13px;
+  border-radius: 4px;
+
+}
+
+.link:hover{
+  background-color: rgba(128, 128, 128, 0.479);
+}
+
+.button{
+  margin: 20px;
+  padding: 20px;
+  font-size: 1.5rem;
+}
+
+.biggie{
+  font-size: 2rem;
 }

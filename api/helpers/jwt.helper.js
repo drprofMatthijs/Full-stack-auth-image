@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const createError = require("http-errors");
 const client = require('./init_redis');
+const User = require("../models/user.model");
 
 const signAccessToken = (userId) =>{
     return new Promise((resolve, reject) =>{
@@ -22,9 +23,8 @@ const signAccessToken = (userId) =>{
 }
 
 const verifyAccessToken = (req,res,next) =>{
-    if (!req.headers.authorization){ return next(createError.Unauthorized())}
-    const authHeader = req.headers.authorization;
-    const token = authHeader.split(" ")[1];
+    const token = req.cookies.accessToken;
+    if (!token){return next(createError.Unauthorized())}
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, payload) =>{
         if(err){
             const message = err.name === 'JsonWebTokenError' ? 'Unauthorized' : err.message;
@@ -88,15 +88,46 @@ const verifyRefreshToken = (refreshToken) =>{
     })
 }
 
-const verifyAccessCookie = (req,res,next) => {
-    res.send(req.cookies)
+//checks if user is requesting his own ID in the url parameters or user is admin.
+//not sure if database call is necessary, as userid is present in token
+const verifyTokenAndAuth = async (req,res,next) =>{
+    verifyAccessToken(req,res, async ()=>{
+        const userId = req.payload.aud
+        const user = await User.findOne({_id: userId});
+        if(!user){return next(createError.Forbidden())}
+        if(user._id === req.params.id || user.isAdmin){
+            const {isAdmin, password, ...safeUserData} = user._doc
+            req.user = safeUserData;
+            next()
+        }
+        else{
+            return next(createError.Forbidden())
+        }
+    })
 }
 
+//Check if user is an admin
+const verifyTokenAndAdmin = async (req,res,next) =>{
+    const userId = req.payload.aud
+    const user = await User.findOne({id: userId});
+    if(!user){return next(createError.Forbidden())}
+    verifyAccessToken(req,res,()=>{
+        if(user.isAdmin){
+            const {isAdmin, password, ...safeUserData} = user._doc
+            req.user = safeUserData;
+            next()
+        }
+        else{
+            return next(createError.Forbidden())
+        }
+    })
+}
 module.exports = {
     signAccessToken,
     verifyAccessToken,
     signRefreshToken,
     verifyRefreshToken,
-    verifyAccessCookie
+    verifyTokenAndAuth,
+    verifyTokenAndAdmin
 
 }
