@@ -41,7 +41,7 @@ router.post("/login", async (req,res,next) =>{
         const refreshToken = await signRefreshToken(user.id);
         
         res.cookie('accessToken', accessToken, {maxAge: 15*60*1000, httpOnly:true})
-        res.cookie('refreshToken', refreshToken, {maxAge: 7*24*60*60*1000, sameSite:'strict', path:'/refresh-token', httpOnly:true})
+        res.cookie('refreshToken', refreshToken, {maxAge: 7*24*60*60*1000, sameSite:'strict', path:process.env.REFRESH_TOKEN_PATH, httpOnly:true})
         const {isAdmin, password, ...safeUserData} = user._doc
         res.status(200).json(safeUserData);
         
@@ -53,15 +53,19 @@ router.post("/login", async (req,res,next) =>{
 })
 
 //Verify refresh token from cookie and set new access and refresh token in cookies
+//CANT ACCESS COOKIES HERE?!@?!?!?!?!?
 
-router.post("/refresh-token", async (req,res,next) =>{
+router.get("/refresh-token", async (req,res,next) =>{
     try {
-        const refreshToken = req.body.refreshToken;
-        if (!refreshToken){throw createError.BadRequest()}
-        const userId = await verifyRefreshToken(refreshToken);
+        console.log(req.cookies)
+        const token = req.cookies.refreshToken;
+        if (!token){console.log("no token found");return next(createError.Unauthorized())}
+        const userId = await verifyRefreshToken(token);
         const newAccessToken = await signAccessToken(userId);
         const newRefreshToken = await signRefreshToken(userId);
-        res.send({accessToken : newAccessToken, refreshToken: newRefreshToken})
+        res.cookie('accessToken', newAccessToken, {maxAge: 15*60*1000, httpOnly:true})
+        res.cookie('refreshToken', newRefreshToken, {maxAge: 7*24*60*60*1000, sameSite:'strict', path:process.env.REFRESH_TOKEN_PATH, httpOnly:true})
+        res.sendStatus(204);
     } catch (err) {
         next(err)
     }

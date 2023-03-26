@@ -42,7 +42,7 @@ export default function Home() {
     try{ 
       let res = await fetch("/api/checks/logged-admin")
       if(!res.ok){
-        setPrivileg("User not found")
+        setPrivileg("Please login first")
       }
       else{
         const json = await res.json()
@@ -55,7 +55,20 @@ export default function Home() {
   }
 
   const testRefresh = async () => {
-    
+    try{ 
+      let res = await fetch("/api/auth/refresh-token", {
+        credentials: "include"
+      })
+      if(!res.ok){
+        setPrivileg("Please login first")
+      }
+      else{
+        setPrivileg("Your tokens are refreshed")
+      }
+    }
+    catch(err){
+      console.log(err)
+    }
   }
 
   return (

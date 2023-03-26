@@ -53,7 +53,6 @@ const signRefreshToken = (userId) =>{
             //save token with redis with expiration time 7d
             try{
                 await client.set(userId, token, {EX: 7*24*60*60})
-                console.log("success saving refresh token in redis")
                 return resolve(token)
             }
             catch(err){

@@ -6,10 +6,12 @@ const {verifyAccessToken, verifyTokenAndAuth, verifyTokenAndAdmin} = require("..
 
 
 router.get('/logged-in', verifyAccessToken, (req,res, next) =>{
+    console.log(req.cookies)
     res.status(200).json("You are logged in")
 })
 
 router.get('/logged-user', (req,res, next) =>{
+    console.log(req.cookies)
     verifyAccessToken(req,res, async (err)=>{
         if(err) {return next(err)}
         const userId = req.payload.aud
@@ -21,6 +23,7 @@ router.get('/logged-user', (req,res, next) =>{
 })
 
 router.get('/logged-admin', (req,res, next) =>{
+    console.log(req.cookies)
     verifyAccessToken(req,res, async (err)=>{
         if(err) {return next(err)}
         const userId = req.payload.aud
