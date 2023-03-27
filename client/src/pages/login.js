@@ -3,6 +3,9 @@ import {useForm} from "react-hook-form"
 import * as yup from 'yup'
 import {yupResolver} from '@hookform/resolvers/yup'
 import {useRouter} from 'next/navigation'
+import { useState } from 'react'
+import {AiOutlineEye} from 'react-icons/ai'
+
 
 
 const schema = yup.object().shape({
@@ -13,6 +16,7 @@ const schema = yup.object().shape({
 
 export default function Login() {
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false)
 
 
   const {register, handleSubmit, formState: {errors}} = useForm({
@@ -42,10 +46,15 @@ export default function Login() {
         <div className={styles.container}>
           <form onSubmit={handleSubmit(onSubmitting)} className={styles.inputform} autoComplete='off'> 
             <h3>Login</h3>
-            <input type='text' placeholder='Email...'{...register("email")}/>
-            <p>{errors.email?.message}</p>
-            <input type='password' placeholder='Password...'{...register("password")}/>
-            <p>{errors.password?.message}</p>
+            <div>
+              <input type='text' placeholder='Email...'{...register("email")}/>
+              <p>{errors.email?.message}</p>
+            </div>
+            <div className={styles.passwordDiv}>
+              <input type={showPassword ? 'text' : 'password'} placeholder='Password...'{...register("password")}/>
+              <AiOutlineEye className={styles.eyeButton} onClick={() => {setShowPassword(!showPassword)}}/>
+              <p>{errors.password?.message}</p>
+            </div>
            <input type='submit'/>
           </form>
         </div>

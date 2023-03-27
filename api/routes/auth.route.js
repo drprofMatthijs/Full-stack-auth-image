@@ -77,12 +77,14 @@ router.get("/refresh-token", async (req,res,next) =>{
 
 router.delete("/logout", async (req,res,next) =>{
     try{
-        const {refreshToken} = req.body;
+        const refreshToken = req.cookies.refreshToken;
         if(!refreshToken){throw createError.BadRequest()}
         const userId = await verifyRefreshToken(refreshToken)
         try{
-            await client.del(userId)
-            res.sendStatus(204)
+            await client.del(userId);
+            res.clearCookie("accessToken");
+            res.clearCookie("refreshToken");
+            res.sendStatus(204);
         }
         catch(err){
             console.log(err.message)
