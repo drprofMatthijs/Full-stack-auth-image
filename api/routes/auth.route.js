@@ -53,10 +53,10 @@ router.post("/login", async (req,res,next) =>{
 //Verify refresh token from cookie and set new access and refresh token in cookies
 //CANT ACCESS COOKIES HERE?!@?!?!?!?!?
 
-router.get("/refresh-token", async (req,res,next) =>{
+router.get("/refresh/refresh-token", async (req,res,next) =>{
     try {
         const token = req.cookies.refreshToken;
-        if (!token){console.log("no token found");return next(createError.Unauthorized())}
+        if (!token){return next(createError.Unauthorized())}
         const userId = await verifyRefreshToken(token);
         const newAccessToken = await signAccessToken(userId);
         const newRefreshToken = await signRefreshToken(userId);
@@ -72,7 +72,7 @@ router.get("/refresh-token", async (req,res,next) =>{
 //Delete it from redis
 //Then delete cookies in browser and send http status code 204
 
-router.delete("/logout", async (req,res,next) =>{
+router.delete("/refresh/logout", async (req,res,next) =>{
     try{
         const refreshToken = req.cookies.refreshToken;
         if(!refreshToken){throw createError.BadRequest()}
@@ -80,7 +80,7 @@ router.delete("/logout", async (req,res,next) =>{
         try{
             await client.del(userId);
             res.clearCookie("accessToken");
-            res.clearCookie("refreshToken");
+            res.clearCookie("refreshToken", {path: process.env.REFRESH_TOKEN_PATH});
             res.sendStatus(204);
         }
         catch(err){

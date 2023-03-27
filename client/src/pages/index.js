@@ -6,26 +6,11 @@ import { useState } from 'react'
 export default function Home() {
   const [privilege, setPrivileg] = useState("")
 
-  const checkLogged = async () =>{
-    try{ 
-      let res = await fetch("/api/checks/logged-in")
-      if(!res.ok){
-        setPrivileg("You are not logged in")
-      }
-      else{
-        setPrivileg(await res.json())
-      }
-    }
-    catch(err){
-      console.log(err)
-    }
-  }
-
   const checkUser = async () =>{
     try{ 
       let res = await fetch("/api/checks/logged-user")
       if(!res.ok){
-        setPrivileg("User not found")
+        setPrivileg("You are not logged in")
       }
       else{
         const json = await res.json()
@@ -56,14 +41,29 @@ export default function Home() {
 
   const testRefresh = async () => {
     try{ 
-      let res = await fetch("/api/auth/refresh-token", {
-        credentials: "include"
-      })
+      let res = await fetch("/api/auth/refresh/refresh-token")
       if(!res.ok){
         setPrivileg("Please login first")
       }
       else{
         setPrivileg("Your tokens are refreshed")
+      }
+    }
+    catch(err){
+      console.log(err)
+    }
+  }
+
+  const logoutUser = async () =>{
+    try{ 
+      let res = await fetch("/api/auth/refresh/logout", {
+        method: 'DELETE'
+      })
+      if(!res.ok){
+        setPrivileg("Please login first")
+      }
+      else{
+        setPrivileg("You are logged out!!")
       }
     }
     catch(err){
@@ -83,10 +83,10 @@ export default function Home() {
         </div>
 
         <div className={styles.container}>
-          <button onClick={checkLogged} className={styles.button}>Check Logged in</button>
-          <button onClick={checkUser} className={styles.button}>Check user</button>
+          <button onClick={checkUser} className={styles.button}>Check logged in</button>
           <button onClick={testRefresh} className={styles.button}>Test refresh</button>
-          <button  onClick={checkAdmin}className={styles.button}>Check admin</button>
+          <button onClick={checkAdmin}className={styles.button}>Check admin</button>
+          <button onClick={logoutUser}className={styles.button}>Logout</button>
         </div>
 
         <div className={styles.container}>

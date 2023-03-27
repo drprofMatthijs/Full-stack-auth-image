@@ -5,10 +5,6 @@ const User = require("../models/user.model");
 const {verifyAccessToken, verifyTokenAndAuth, verifyTokenAndAdmin} = require("../helpers/jwt.helper")
 
 
-router.get('/logged-in', verifyAccessToken, (req,res, next) =>{
-    res.status(200).json("You are logged in")
-})
-
 router.get('/logged-user', (req,res, next) =>{
     verifyAccessToken(req,res, async (err)=>{
         if(err) {return next(err)}
