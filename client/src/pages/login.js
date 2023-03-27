@@ -1,6 +1,6 @@
 import styles from '@/styles/Home.module.css'
 import {useForm} from "react-hook-form"
-import * as yup from 'yup'
+
 import {yupResolver} from '@hookform/resolvers/yup'
 import {useRouter} from 'next/navigation'
 import { useState } from 'react'
@@ -8,22 +8,16 @@ import {AiOutlineEye} from 'react-icons/ai'
 
 
 
-const schema = yup.object().shape({
-  email: yup.string().email("That is not an email").required("Email is required"),
-  password: yup.string().min(8, "Password needs to be longer than 8 characters").required("Password is required")
-
-})
-
 export default function Login() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
 
 
-  const {register, handleSubmit, formState: {errors}} = useForm({
-    resolver: yupResolver(schema)
-  });
+  const {register, handleSubmit, formState: {errors}} = useForm();
 
   const onSubmitting = async (data) =>{
+    setErrorMessage("")
     let res = await fetch("/api/auth/login", {
       method:"POST",
       body: JSON.stringify({...data}),
@@ -31,15 +25,16 @@ export default function Login() {
         'Content-Type': 'application/json'
       }
     })
-    //SET USER CONTEXT HERE TO ACCESS IT IN EVERY PAGE
+    if (!res.ok){
+      setErrorMessage("Invalid Credentials")
 
-    router.push('/')
+    }
+    else{
+      router.push('/')
+    }
+
   }
 
-  const checkAuth = async () =>{
-    let res = await fetch("/api/")
-    console.log(await res.json())
-  }
   return (
     <>
       <main className={styles.main}>
@@ -56,6 +51,7 @@ export default function Login() {
               <p>{errors.password?.message}</p>
             </div>
            <input type='submit'/>
+           {errorMessage && <p className={styles.loginError}>{errorMessage}</p>}
           </form>
         </div>
       </main>

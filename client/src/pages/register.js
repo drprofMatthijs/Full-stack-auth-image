@@ -7,7 +7,6 @@ import {useRouter} from 'next/navigation'
 
 
 const schema = yup.object().shape({
-  username: yup.string().required("Username is required"),
   email: yup.string().email("That is not an email").required("Email is required"),
   password: yup.string().min(8, "Password needs to be longer than 8 characters").required("Password is required"),
   confirmPassword: yup.string().oneOf([yup.ref("password"), null], "Passwords do not match").required("Confirming your password is required")
@@ -15,24 +14,36 @@ const schema = yup.object().shape({
 
 export default function Register() {
   const router = useRouter();
+  const [errorMessage, setErrorMessage] = useState("")
 
   const {register, handleSubmit, formState: {errors}} = useForm({
     resolver: yupResolver(schema)
   });
 
   const onSubmitting = async (data) =>{
-    let res = await fetch("https://localhost:5000")
+    setErrorMessage("")
+    let res = await fetch("/api/auth/register", {
+      method:"POST",
+      body: JSON.stringify({...data}),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    if (!res.ok){
+      setErrorMessage("Something went wrong. Please try again")
 
-    //router.push(`/success?username=${data.username}`)
+    }
+    else{
+      router.push('/login')
+    }
+
   }
   return (
     <>
       <main className={styles.main}>
         <div className={styles.container}>
           <form onSubmit={handleSubmit(onSubmitting)} className={styles.inputform} autoComplete='off'> 
-            <h3>Login</h3>
-            <input type='text' placeholder='Username...' {...register("username")}/>
-            <p>{errors.username?.message}</p>
+            <h3>Register</h3>
             <input type='text' placeholder='Email...'{...register("email")}/>
             <p>{errors.email?.message}</p>
             <input type='password' placeholder='Password...'{...register("password")}/>
@@ -40,6 +51,7 @@ export default function Register() {
             <input type='password' placeholder='Confirm Password...'{...register("confirmPassword")}/>
             <p>{errors.confirmPassword?.message}</p>
            <input type='submit'/>
+           {errorMessage && <p className={styles.loginError}>{errorMessage}</p>}
           </form>
         </div>
       </main>

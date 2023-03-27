@@ -3,14 +3,12 @@ const createError = require("http-errors");
 const User = require("../models/user.model");
 const client = require('../helpers/init_redis')
 
-const {authSchema} = require("../helpers/validation.schema");
+const {registerAuthSchema, loginAuthSchema} = require("../helpers/validation.schema");
 const {signAccessToken, signRefreshToken, verifyRefreshToken} = require("../helpers/jwt.helper")
 
 router.post("/register", async (req,res,next) =>{
     try{
-        //const {email, password} = req.body;
-        //if (!email || !password){throw createError.BadRequest()}
-        const result = await authSchema.validateAsync(req.body);
+        const result = await registerAuthSchema.validateAsync(req.body);
         
         const doesExist = await User.findOne({email: result.email});
         if (doesExist){ throw createError.Conflict(result.email + " is already registered")}
@@ -29,7 +27,7 @@ router.post("/register", async (req,res,next) =>{
 
 router.post("/login", async (req,res,next) =>{
     try {
-        const result = await authSchema.validateAsync(req.body);
+        const result = await loginAuthSchema.validateAsync(req.body);
         const user = await User.findOne({email: result.email});
         if(!user) { throw createError.NotFound("Email is not registered")}
         const isMatch = await user.isValidPassword(result.password);
@@ -57,7 +55,6 @@ router.post("/login", async (req,res,next) =>{
 
 router.get("/refresh-token", async (req,res,next) =>{
     try {
-        console.log(req.cookies)
         const token = req.cookies.refreshToken;
         if (!token){console.log("no token found");return next(createError.Unauthorized())}
         const userId = await verifyRefreshToken(token);

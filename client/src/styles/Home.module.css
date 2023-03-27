@@ -18,6 +18,11 @@
   width: min(450px, 100%);
 }
 
+.inputform p{
+  font-size: 2rem;
+  color: red;
+}
+
 .inputform input{
   margin: 10px;
   font-size: 2rem;
@@ -39,6 +44,12 @@
 
 .eyeButton:hover{
   background-color: rgba(128, 128, 128, 0.315);
+}
+
+.loginError{
+  margin-top: 20px;
+  font-size: 2rem;
+  color: rgb(230, 20, 20);
 }
 
 
